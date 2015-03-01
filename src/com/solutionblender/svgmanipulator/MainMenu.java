@@ -2,6 +2,10 @@ package com.solutionblender.svgmanipulator;
 
 import javax.swing.*;
 import com.leapmotion.leap.*;
+import processing.core.PApplet;
+import processing.opengl.*;
+
+
 import java.awt.event.*;
 
 /**
@@ -11,6 +15,7 @@ public class MainMenu {
 
     private static Controller controller;
     private static SampleListener listener;
+    private static Displayer hello;
     public static void main(String[] args) {
         JFrame frame = new JFrame("MainMenu");
         frame.setContentPane(new MainMenu().MainPanel);
@@ -18,7 +23,7 @@ public class MainMenu {
         frame.pack();
         frame.setVisible(true);
 
-        listener = new SampleListener();
+       /* listener = new SampleListener();
         controller = new Controller();
 
         // Have the sample listener receive events from the controller
@@ -27,7 +32,10 @@ public class MainMenu {
             public void windowClosing(WindowEvent e) {
                 controller.removeListener(listener);
             }
-        });
+        });*/
+        PApplet.main(new String[] { "com.solutionblender.svgmanipulator.Displayer" });
+
+
     }
 
     private JPanel MainPanel;
