@@ -2,6 +2,11 @@ package com.solutionblender.svgmanipulator;
 
 import de.voidplus.leapmotion.*;
 import com.leapmotion.leap.*;
+import de.voidplus.leapmotion.CircleGesture;
+import de.voidplus.leapmotion.Gesture;
+import de.voidplus.leapmotion.KeyTapGesture;
+import de.voidplus.leapmotion.ScreenTapGesture;
+import de.voidplus.leapmotion.SwipeGesture;
 import processing.opengl.*;
 import de.voidplus.leapmotion.Arm;
 import de.voidplus.leapmotion.Bone;
@@ -11,22 +16,36 @@ import de.voidplus.leapmotion.Hand;
 import de.voidplus.leapmotion.Tool;
 import processing.core.*;
 
+import java.io.File;
+import java.util.ArrayList;
+
 /**
  * Created by Alex on 3/1/2015.
  */
 public class Displayer extends PApplet {
     
-   public static LeapMotion leap;
+   public LeapMotion leap;
     private PShape svg1;
-
+    private ArrayList<String> svgs;
    public void setup(){
        size(1200, 500);
         background(255);
        svg1 = loadShape("Map.svg");
 
+       File folder = new File(System.getProperty("user.dir"));
+       File[] listOfFiles = folder.listFiles();
+        svgs = new ArrayList<String>();
+       for (int i = 0; i < listOfFiles.length; i++) {
+           if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".svg")) {
+               System.out.println("File " + listOfFiles[i].getAbsolutePath());
+               svgs.add(listOfFiles[i].getAbsolutePath());
+           } else if (listOfFiles[i].isDirectory()) {
+               //System.out.println("Directory " + listOfFiles[i].getName());
+           }
+       }
         // ...
 
-        leap = new LeapMotion(this);
+        leap = new LeapMotion(this).withGestures();
 
     }
 
@@ -225,12 +244,12 @@ public class Displayer extends PApplet {
            float device_verical_view_angle = device.getVerticalViewAngle();
            float device_range = device.getRange();
        }
-
+       if (scaleAmount < 0.1) {            scaleAmount = 0.1f;        }
      // shapeMode(CENTER);
         translate(transAmountX, transAmountY);
         scale(scaleAmount);
 
-       shape(svg1,110,90);
+       shape(svg1,0,0);
 
        if (leap.getHands().size() == 2){
           checkHandDistanceZoomOut(leap.getRightHand(), leap.getLeftHand());
@@ -238,32 +257,53 @@ public class Displayer extends PApplet {
 
 
     }
-       if (leap.getHands().size() == 1){
 
-           if(leap.getFrontHand().getPosition().x < 200){
-               transAmountX = transAmountX + 10;
-               System.out.println(leap.getFrontHand().getPosition().x);
+       if (leap.getHands().size() == 1 && leap.getFrontHand().getPosition().y > 600 && oldtime != leap.getTimestamp() && oldtime < (leap.getTimestamp() - 3000000)){
+           if(viewIndex == (svgs.size())){
+               viewIndex = 1;
            }
 
-           if(leap.getFrontHand().getPosition().x > 500){
+            svg1 = loadShape(svgs.get(viewIndex));
+
+           viewIndex = viewIndex + 1;
+           oldtime = leap.getTimestamp();
+           System.out.println(oldtime + "old  new" + leap.getTimestamp());
+       }
+
+       if (leap.getHands().size() == 2){
+
+           if(leap.getLeftHand().getPosition().x < 200){
                transAmountX = transAmountX - 10;
-               System.out.println(leap.getFrontHand().getPosition().x);
+               System.out.println(leap.getLeftHand().getPosition().x);
            }
-           if(leap.getFrontHand().getPosition().y > 500){
+
+           if(leap.getRightHand().getPosition().x > 600){
+               transAmountX = transAmountX + 10;
+               System.out.println(leap.getRightHand().getPosition().x);
+           }
+          /* if(leap.getFrontHand().getPosition().y > 600){
                transAmountY = transAmountY - 10;
                System.out.println(leap.getFrontHand().getPosition().x);
-           }   if(leap.getFrontHand().getPosition().y < 200){
+           }
+           if(leap.getFrontHand().getPosition().y < 200){
                transAmountY = transAmountY + 10;
                System.out.println(leap.getFrontHand().getPosition().x);
-           }
+           }*/
 
 
 
        }
 
 
+      //  leap.currentFrame().gestures().
+
+
+           //System.out.println( leap.currentFrame().gestures().count());
+
 
     }
+    private long oldtime;
+    private int viewIndex = 1;
     private float transAmountX;
     private float transAmountY;
     private float scaleAmount = 0.5f;
@@ -306,7 +346,89 @@ public class Displayer extends PApplet {
 
     }
 
-// ========= CALLBACKS =========
+
+
+    // ----- SWIPE GESTURE -----
+
+  public  void leapOnSwipeGesture(SwipeGesture g, int state){
+        int     id                  = g.getId();
+        Finger  finger              = g.getFinger();
+        PVector position            = g.getPosition();
+        PVector position_start      = g.getStartPosition();
+        PVector direction           = g.getDirection();
+        float   speed               = g.getSpeed();
+        long    duration            = g.getDuration();
+        float   duration_seconds    = g.getDurationInSeconds();
+
+        switch(state){
+            case 1: // Start
+                break;
+            case 2: // Update
+                break;
+            case 3: // Stop
+                println("SwipeGesture: "+id);
+                break;
+        }
+    }
+
+
+// ----- CIRCLE GESTURE -----
+
+    void leapOnCircleGesture(CircleGesture g, int state){
+        int     id                  = g.getId();
+        Finger  finger              = g.getFinger();
+        PVector position_center     = g.getCenter();
+        float   radius              = g.getRadius();
+        float   progress            = g.getProgress();
+        long    duration            = g.getDuration();
+        float   duration_seconds    = g.getDurationInSeconds();
+        int     direction          = g.getDirection();
+
+        switch(state){
+            case 1: // Start
+                break;
+            case 2: // Update
+                break;
+            case 3: // Stop
+                println("CircleGesture: "+id);
+                break;
+        }
+
+        switch(direction){
+            case 0: // Anticlockwise/Left gesture
+                break;
+            case 1: // Clockwise/Right gesture
+                break;
+        }
+    }
+
+
+// ----- SCREEN TAP GESTURE -----
+
+    void leapOnScreenTapGesture(ScreenTapGesture g){
+        int     id                  = g.getId();
+        Finger  finger              = g.getFinger();
+        PVector position            = g.getPosition();
+        PVector direction           = g.getDirection();
+        long    duration            = g.getDuration();
+        float   duration_seconds    = g.getDurationInSeconds();
+
+        println("ScreenTapGesture: "+id);
+    }
+
+
+// ----- KEY TAP GESTURE -----
+
+    void leapOnKeyTapGesture(KeyTapGesture g){
+        int     id                  = g.getId();
+        Finger  finger              = g.getFinger();
+        PVector position            = g.getPosition();
+        PVector direction           = g.getDirection();
+        long    duration            = g.getDuration();
+        float   duration_seconds    = g.getDurationInSeconds();
+
+        println("KeyTapGesture: "+id);
+    }
 
     void leapOnInit(){
         // println("Leap Motion Init");
