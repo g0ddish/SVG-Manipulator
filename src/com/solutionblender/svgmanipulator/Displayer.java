@@ -15,8 +15,7 @@ import processing.core.*;
  * Created by Alex on 3/1/2015.
  */
 public class Displayer extends PApplet {
-
-
+    
    public static LeapMotion leap;
 
    public void setup(){
