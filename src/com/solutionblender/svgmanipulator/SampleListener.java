@@ -12,6 +12,13 @@ public class SampleListener extends Listener  {
     }
 
     public void onFrame(Controller controller) {
-        System.out.println("Frame available");
+        Frame frame = controller.frame();
+
+        System.out.println("Frame id: " + frame.id()
+                + ", timestamp: " + frame.timestamp()
+                + ", hands: " + frame.hands().count()
+                + ", fingers: " + frame.fingers().count()
+                + ", tools: " + frame.tools().count()
+                + ", gestures " + frame.gestures().count());
     }
 }
