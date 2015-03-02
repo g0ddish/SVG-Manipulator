@@ -30,7 +30,7 @@ public class Displayer extends PApplet {
    public void setup(){
        size(1200, 500);
         background(255);
-       svg1 = loadShape("Map.svg");
+       //svg1 = loadShape("Map.svg");
 
        File folder = new File(System.getProperty("user.dir"));
        File[] listOfFiles = folder.listFiles();
@@ -44,8 +44,10 @@ public class Displayer extends PApplet {
            }
        }
         // ...
-
+       svg1 = loadShape(svgs.get(1));
         leap = new LeapMotion(this).withGestures();
+       leap.setGestureSwipeMinLength(80);
+               //leap.setGestureSwipeMinVelocity()
 
     }
 
@@ -259,15 +261,9 @@ public class Displayer extends PApplet {
     }
 
        if (leap.getHands().size() == 1 && leap.getFrontHand().getPosition().y > 600 && oldtime != leap.getTimestamp() && oldtime < (leap.getTimestamp() - 3000000)){
-           if(viewIndex == (svgs.size())){
-               viewIndex = 1;
-           }
 
-            svg1 = loadShape(svgs.get(viewIndex));
-
-           viewIndex = viewIndex + 1;
-           oldtime = leap.getTimestamp();
-           System.out.println(oldtime + "old  new" + leap.getTimestamp());
+       //    oldtime = leap.getTimestamp();
+         //  System.out.println(oldtime + "old  new" + leap.getTimestamp());
        }
 
        if (leap.getHands().size() == 2){
@@ -366,6 +362,12 @@ public class Displayer extends PApplet {
             case 2: // Update
                 break;
             case 3: // Stop
+                if(viewIndex == (svgs.size())){
+                    viewIndex = 0;
+                }
+                svg1 = loadShape(svgs.get(viewIndex));
+                viewIndex = viewIndex + 1;
+
                 println("SwipeGesture: "+id);
                 break;
         }
