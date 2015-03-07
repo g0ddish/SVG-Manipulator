@@ -16,26 +16,36 @@ public class Displayer extends PApplet {
     
    public LeapMotion leap;
     private PShape svg1;
+    private PImage image;
     private ArrayList<String> svgs;
+    private ArrayList<String> img;
+
    public void setup(){
-       size(1200, 500);
+       size(Math.round(sizeX), Math.round(sizeY));
         background(255);
        //svg1 = loadShape("Map.svg");
 
        File folder = new File(System.getProperty("user.dir"));
        File[] listOfFiles = folder.listFiles();
         svgs = new ArrayList<String>();
+       img = new ArrayList<String>();
+
        for (int i = 0; i < listOfFiles.length; i++) {
            if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".svg")) {
                System.out.println("File " + listOfFiles[i].getAbsolutePath());
                svgs.add(listOfFiles[i].getAbsolutePath());
            } else if (listOfFiles[i].isDirectory()) {
                //System.out.println("Directory " + listOfFiles[i].getName());
+           } else if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".jpg")){
+               System.out.println("File " + listOfFiles[i].getAbsolutePath());
+               img.add(listOfFiles[i].getAbsolutePath());
+
            }
        }
         // ...
        svg1 = loadShape(svgs.get(1));
-        leap = new LeapMotion(this).withGestures();
+       image = loadImage(img.get(1));
+       leap = new LeapMotion(this).withGestures();
        leap.setGestureSwipeMinLength(400);
        //leap.setGestureSwipeMinVelocity(1000);
 
@@ -44,10 +54,12 @@ public class Displayer extends PApplet {
    public void draw() {
        background(255);
        // ...
+;
 
 
        // ========= HANDS =========
-
+pushMatrix();
+       shapeMode(CORNER);
        for (Hand hand : leap.getHands()) {
            hand.draw();
 
@@ -60,6 +72,8 @@ public class Displayer extends PApplet {
 
        shape(svg1,0,0);
 
+
+
        if (leap.getHands().size() == 2){
           checkHandDistanceZoomOut(leap.getRightHand(), leap.getLeftHand());
            checkHandDistanceZoomIn(leap.getRightHand(), leap.getLeftHand());
@@ -70,19 +84,20 @@ public class Displayer extends PApplet {
        if (leap.getHands().size() == 1){
            //System.out.println(scaleAmount);
            if(scaleAmount < 2) {
-               if (transAmountX > 1100) {
-                   transAmountX = 1100;
+               if (transAmountX > sizeX + 100) {
+                   transAmountX = sizeX +100;
                }
                if (transAmountX < 0 - 100) {
                    transAmountX = 0 - 100;
                }
-               if (transAmountY > height - 100) {
-                   transAmountY = height - 100;
+               if (transAmountY > sizeY - 100) {
+                   transAmountY = sizeY - 100;
                }
                if (transAmountY < 0 - 100) {
                    transAmountY = 0 - 100;
                }
            }
+
            //case statement instead
 
            if(leap.getFrontHand().getPosition().x < 200){
@@ -94,14 +109,16 @@ public class Displayer extends PApplet {
                transAmountX = transAmountX + 5;
                //System.out.println(leap.getRightHand().getPosition().x);
            }
-           if(leap.getFrontHand().getPosition().y > 150){
-               transAmountY = transAmountY + 5;
+           if(leap.getFrontHand().getPosition().y > 250){
+               transAmountY = transAmountY + 5; // moves up
                //System.out.println(leap.getFrontHand().getPosition().y);
            }
-           if(leap.getFrontHand().getPosition().y < 400){
-               transAmountY = transAmountY - 5;
+           if(leap.getFrontHand().getPosition().y < 500){
+               transAmountY = transAmountY - 5; // moves down
                //System.out.println(leap.getFrontHand().getPosition().y);
            }
+
+           //Switching SVGs when touching forward
 
            if(leap.getFrontHand().getPosition().z > 60){
                if(delay > 60) {
@@ -110,6 +127,7 @@ public class Displayer extends PApplet {
                        viewIndex = 0;
                    }
                    svg1 = loadShape(svgs.get(viewIndex));
+                   image = loadImage(img.get(viewIndex));
                    viewIndex = viewIndex + 1;
 
                    System.out.println(leap.getFrontHand().getPosition().z);
@@ -118,14 +136,57 @@ public class Displayer extends PApplet {
 
        }
 
+
+       popMatrix();
+
+
        delay = delay + 1;
+       pushMatrix();
+
+       //MiniMap
+
+       //translate(0,0);
+       //shapeMode(CENTER);
+       //svg1Width = (svg1.getWidth()/1200)*100;
+       //svg1Height = (svg1.getHeight()/800)*100;
+       //svg1Width = map(svg1.getWidth(), 0, 100, 0, 216);
+       //svg1Height = map(svg1.getHeight(), 0, 50, 0, 144);
+        //scale(0.5f);
+        image(image, sizeX - 216, sizeY-144);
+       //shape(svg1, sizeX - 216,sizeY-144, 144, 216);
+       //System.out.println(svg1);
+       stroke(1);
+       //fill(255);
+       noFill();
+       rect(sizeX-216, sizeY-144, 216, 144);
+
+
+       precentX=transAmountX/sizeX;
+       precentY=transAmountY/sizeY;
+       miniX = map(precentX, 0, 1, sizeX, sizeX-100);
+       miniY = map(precentY, 0, 1, sizeY, sizeY-70);
+       //miniX = constrain(miniX, sizeX-200,sizeX);
+       //scale(scaleAmount);
+       noFill();
+       //rectMode(CENTER);
+       miniScaleX = map(scaleAmount, 0, 20, 200, 0);
+       miniScaleY = map(scaleAmount, 0, 20, 130, 0);
+       rect(miniX, miniY, miniScaleX, miniScaleY);
+
+       rectMode(CORNER);
+       popMatrix();
 
     }
     private int viewIndex = 1;
-    private float transAmountX;
+    private float transAmountX=300;
     private float transAmountY;
-    private float scaleAmount = 0f;
+    private float scaleAmount = 3f;
     private float delay = 0f;
+    private float sizeX = 1200f;
+    private float sizeY = 800f;
+    private float precentX=0f;
+    private float precentY=0f;
+    private float miniX, miniY, miniScaleX, miniScaleY, svg1Width, svg1Height = 0f;
 
     private void checkHandDistanceZoomOut(Hand right, Hand left){
       //  System.out.println(right.getPosition().x - left.getPosition().x);
