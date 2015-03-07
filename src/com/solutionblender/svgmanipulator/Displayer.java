@@ -83,20 +83,19 @@ pushMatrix();
 
        if (leap.getHands().size() == 1){
            //System.out.println(scaleAmount);
-           if(scaleAmount < 2) {
-               if (transAmountX > sizeX + 100) {
-                   transAmountX = sizeX +100;
-               }
-               if (transAmountX < 0 - 100) {
-                   transAmountX = 0 - 100;
-               }
-               if (transAmountY > sizeY - 100) {
-                   transAmountY = sizeY - 100;
-               }
-               if (transAmountY < 0 - 100) {
-                   transAmountY = 0 - 100;
-               }
+           if (transAmountX > sizeX) {
+               transAmountX = sizeX;
            }
+           if (transAmountY > sizeY) {
+               transAmountY = sizeY;
+           }
+           if (transAmountX < 0 - svg1.getWidth()*scaleAmount) {
+               transAmountX = 0 - svg1.getWidth()*scaleAmount;
+           }
+           if (transAmountY < 0 - svg1.getHeight()*scaleAmount) {
+               transAmountY = 0 - svg1.getHeight()*scaleAmount;
+           }
+
 
            //case statement instead
 
@@ -154,7 +153,7 @@ pushMatrix();
         //scale(0.5f);
         image(image, sizeX - 216, sizeY-144);
        //shape(svg1, sizeX - 216,sizeY-144, 144, 216);
-       //System.out.println(svg1);
+       System.out.println(scaleAmount);
        stroke(1);
        //fill(255);
        noFill();
