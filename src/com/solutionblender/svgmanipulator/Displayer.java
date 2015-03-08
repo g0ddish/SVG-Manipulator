@@ -18,32 +18,42 @@ public class Displayer extends PApplet {
     private PShape svg1;
     private PImage image;
     private ArrayList<String> svgs;
+    private ArrayList<PShape> pshapes;
     private ArrayList<String> img;
 
    public void setup(){
-       size(Math.round(sizeX), Math.round(sizeY));
+       //frameRate(15);
+       size(Math.round(sizeX), Math.round(sizeY), P2D);
         background(255);
        //svg1 = loadShape("Map.svg");
 
        File folder = new File(System.getProperty("user.dir"));
        File[] listOfFiles = folder.listFiles();
         svgs = new ArrayList<String>();
+        pshapes = new ArrayList<PShape>();
        img = new ArrayList<String>();
 
        for (int i = 0; i < listOfFiles.length; i++) {
            if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".svg")) {
                System.out.println("File " + listOfFiles[i].getAbsolutePath());
                svgs.add(listOfFiles[i].getAbsolutePath());
+               PShape fuckery = loadShape(listOfFiles[i].getAbsolutePath());
+               if(fuckery != null){
+                   pshapes.add(fuckery);
+               }
+
+
            } else if (listOfFiles[i].isDirectory()) {
                //System.out.println("Directory " + listOfFiles[i].getName());
            } else if (listOfFiles[i].isFile() && listOfFiles[i].getName().endsWith(".jpg")){
-               System.out.println("File " + listOfFiles[i].getAbsolutePath());
+              //System.out.println("File " + listOfFiles[i].getAbsolutePath());
                img.add(listOfFiles[i].getAbsolutePath());
 
            }
        }
         // ...
-       svg1 = loadShape(svgs.get(1));
+       svg1 = pshapes.get(1);
+
        image = loadImage(img.get(1));
        leap = new LeapMotion(this).withGestures();
        leap.setGestureSwipeMinLength(400);
@@ -96,23 +106,23 @@ pushMatrix();
                transAmountY = 0 - svg1.getHeight()*scaleAmount;
            }
 
+            Float frontHandPosX = leap.getFrontHand().getPosition().x;
+            Float frontHandPosY = leap.getFrontHand().getPosition().y;
 
-           //case statement instead
-
-           if(leap.getFrontHand().getPosition().x < 200){
+           if(frontHandPosX != null && frontHandPosX < 200){
                transAmountX = transAmountX - 5;
                //System.out.println(leap.getLeftHand().getPosition().x);
            }
 
-           if(leap.getFrontHand().getPosition().x > 1200){
+           if(frontHandPosX != null && frontHandPosX > 1200){
                transAmountX = transAmountX + 5;
                //System.out.println(leap.getRightHand().getPosition().x);
            }
-           if(leap.getFrontHand().getPosition().y > 250){
+           if(frontHandPosY != null && frontHandPosY > 250){
                transAmountY = transAmountY + 5; // moves up
                //System.out.println(leap.getFrontHand().getPosition().y);
            }
-           if(leap.getFrontHand().getPosition().y < 500){
+           if(frontHandPosY != null && frontHandPosY < 500){
                transAmountY = transAmountY - 5; // moves down
                //System.out.println(leap.getFrontHand().getPosition().y);
            }
@@ -122,14 +132,14 @@ pushMatrix();
            if(leap.getFrontHand().getPosition().z > 60){
                if(delay > 60) {
                    delay = 0;
-                   if (viewIndex == (svgs.size())) {
+                   if (viewIndex == (pshapes.size())) {
                        viewIndex = 0;
                    }
-                   svg1 = loadShape(svgs.get(viewIndex));
+                   svg1 = pshapes.get(viewIndex);
                    image = loadImage(img.get(viewIndex));
                    viewIndex = viewIndex + 1;
 
-                   System.out.println(leap.getFrontHand().getPosition().z);
+                   //System.out.println(leap.getFrontHand().getPosition().z);
                }
            }
 
@@ -151,28 +161,26 @@ pushMatrix();
        //svg1Width = map(svg1.getWidth(), 0, 100, 0, 216);
        //svg1Height = map(svg1.getHeight(), 0, 50, 0, 144);
         //scale(0.5f);
-        image(image, sizeX - 216, sizeY-144);
-       //shape(svg1, sizeX - 216,sizeY-144, 144, 216);
-       System.out.println(scaleAmount);
+       image(image, sizeX - 216, sizeY-144);
+       //System.out.println(scaleAmount);
        stroke(1);
-       //fill(255);
        noFill();
        rect(sizeX-216, sizeY-144, 216, 144);
 
 
        precentX=transAmountX/sizeX;
        precentY=transAmountY/sizeY;
-       miniX = map(precentX, 0, 1, sizeX, sizeX-100);
-       miniY = map(precentY, 0, 1, sizeY, sizeY-70);
+       miniX = map(precentX, 0, 1, sizeX-216, sizeX);
+       miniY = map(precentY, 0, 1, sizeY-144, sizeY);
        //miniX = constrain(miniX, sizeX-200,sizeX);
        //scale(scaleAmount);
        noFill();
        //rectMode(CENTER);
-       miniScaleX = map(scaleAmount, 0, 20, 200, 0);
-       miniScaleY = map(scaleAmount, 0, 20, 130, 0);
+       miniScaleX = map(scaleAmount, 0, 30, 216, 0);
+       miniScaleY = map(scaleAmount, 0, 30, 144, 0);
        rect(miniX, miniY, miniScaleX, miniScaleY);
 
-       rectMode(CORNER);
+       //rectMode(CORNER);
        popMatrix();
 
     }
